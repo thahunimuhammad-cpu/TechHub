@@ -1,0 +1,87 @@
+.vendor-detail {
+  min-height: 100vh;
+}
+
+.vendor-hero {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 80px 0;
+}
+
+.vendor-hero-content {
+  text-align: center;
+}
+
+.vendor-icon-large {
+  font-size: 80px;
+  margin-bottom: 20px;
+  display: block;
+}
+
+.vendor-hero h1 {
+  font-size: 48px;
+  font-weight: bold;
+  margin: 0 0 15px 0;
+}
+
+.vendor-tagline {
+  font-size: 18px;
+  opacity: 0.9;
+  margin: 0 0 10px 0;
+}
+
+.product-count-large {
+  font-size: 16px;
+  opacity: 0.85;
+  margin: 0;
+}
+
+.back-link {
+  color: #667eea;
+  text-decoration: none;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: color 0.3s ease;
+}
+
+.back-link:hover {
+  color: #764ba2;
+}
+
+.section-title {
+  font-size: 28px;
+  font-weight: bold;
+  color: #1a1a2e;
+  margin: 0 0 40px 0;
+  text-align: center;
+}
+
+.no-products {
+  text-align: center;
+  padding: 60px 0;
+  color: #7f8c8d;
+}
+
+.no-products p {
+  font-size: 16px;
+}
+
+@media (max-width: 768px) {
+  .vendor-hero {
+    padding: 50px 0;
+  }
+
+  .vendor-icon-large {
+    font-size: 60px;
+  }
+
+  .vendor-hero h1 {
+    font-size: 32px;
+  }
+
+  .vendor-tagline {
+    font-size: 16px;
+  }
+}

@@ -1,0 +1,129 @@
+.header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.header-top {
+  background-color: rgba(0, 0, 0, 0.1);
+  text-align: center;
+  padding: 10px 0;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.navbar {
+  padding: 20px 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 28px;
+  font-weight: bold;
+  color: white;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: 1px;
+  transition: transform 0.3s ease;
+}
+
+.logo:hover {
+  transform: scale(1.05);
+}
+
+.logo-icon {
+  font-size: 32px;
+}
+
+.nav-menu {
+  display: flex;
+  list-style: none;
+  gap: 30px;
+  margin: 0;
+  padding: 0;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.nav-menu a {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  padding: 8px 12px;
+  border-radius: 5px;
+}
+
+.nav-menu a:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.cart-link {
+  background-color: rgba(255, 255, 255, 0.3);
+  padding: 10px 16px !important;
+  border-radius: 20px !important;
+  font-weight: 600 !important;
+}
+
+.cart-link:hover {
+  background-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.signin-link {
+  background-color: #ff6b6b !important;
+  padding: 8px 16px !important;
+  border-radius: 6px !important;
+  font-weight: 600 !important;
+}
+
+.signin-link:hover {
+  background-color: #ff5252 !important;
+}
+
+.account-link,
+.settings-link {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  padding: 8px 14px !important;
+  border-radius: 6px !important;
+}
+
+.account-link:hover,
+.settings-link:hover {
+  background-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+@media (max-width: 768px) {
+  .nav-container {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .nav-menu {
+    gap: 15px;
+    justify-content: center;
+  }
+
+  .logo {
+    font-size: 24px;
+  }
+
+  .nav-menu a {
+    font-size: 14px;
+  }
+}

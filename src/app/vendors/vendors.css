@@ -1,0 +1,87 @@
+.vendors-page {
+  min-height: 100vh;
+}
+
+.vendors-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  text-align: center;
+}
+
+.vendors-header h1 {
+  font-size: 42px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.vendors-header p {
+  font-size: 16px;
+  opacity: 0.9;
+}
+
+.vendors-section {
+  background-color: #f8f9fa;
+}
+
+.vendors-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 30px;
+}
+
+.vendor-card {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.vendor-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 30px rgba(102, 126, 234, 0.15);
+  border-color: #667eea;
+}
+
+.vendor-icon {
+  font-size: 48px;
+  margin-bottom: 15px;
+}
+
+.vendor-card h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a1a2e;
+  margin: 0 0 10px 0;
+}
+
+.vendor-description {
+  color: #7f8c8d;
+  font-size: 14px;
+  margin: 0 0 15px 0;
+  line-height: 1.6;
+}
+
+.product-count {
+  color: #667eea;
+  font-weight: 600;
+  font-size: 14px;
+  margin: 0 0 20px 0;
+}
+
+.vendor-card .btn {
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .vendors-header h1 {
+    font-size: 32px;
+  }
+
+  .vendors-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
