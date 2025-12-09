@@ -30,7 +30,7 @@ export default function Header() {
         <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 font-bold text-xl text-blue-600">
             <ShoppingCart className="w-6 h-6" />
-            TechHub
+           Choppes LLC
           </Link>
 
           <div className="hidden md:flex gap-6">

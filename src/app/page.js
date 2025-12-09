@@ -1,6 +1,6 @@
 import { getProducts } from '@/lib/supabase/queries';
 import Link from 'next/link';
-import ProductCard from '@/components/ProductCard';
+import FeaturedProductsWrapper from '@/components/FeaturedProductsWrapper';
 import { ArrowRight, Zap, Truck, DollarSign, Phone, RefreshCw, Shield } from 'lucide-react';
 
 async function HomePageContent() {
@@ -14,7 +14,7 @@ async function HomePageContent() {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
             <div>
-              <h1 className="text-5xl font-bold mb-4">Welcome to TechHub</h1>
+              <h1 className="text-5xl font-bold mb-4">Welcome to Choppes LLC</h1>
               <p className="text-xl text-blue-100 mb-8">
                 Discover cutting-edge gadgets and everyday tech essentials — all in one place
               </p>
@@ -40,24 +40,14 @@ async function HomePageContent() {
               View All <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {featuredProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                onAddToCart={async (item) => {
-                  // This will be handled by client component
-                }}
-              />
-            ))}
-          </div>
+          <FeaturedProductsWrapper products={featuredProducts} />
         </div>
       </section>
 
       {/* Why Choose Us */}
       <section className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">Why Choose TechHub?</h2>
+          <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">Why Choose  Choppes LLC?</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <div className="bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition">
               <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">

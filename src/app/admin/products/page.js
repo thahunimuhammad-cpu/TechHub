@@ -1,16 +1,18 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { use } from 'react';
 import Link from 'next/link';
 import { getProducts, deleteProduct } from '@/lib/supabase/queries';
 import { Plus, Edit2, Trash2, Search } from 'lucide-react';
 
 export default function AdminProductsPage({ searchParams }) {
+  const resolvedSearchParams = use(searchParams);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState(null);
-  const adminKey = searchParams.key;
+  const adminKey = resolvedSearchParams.key;
 
   useEffect(() => {
     loadProducts();

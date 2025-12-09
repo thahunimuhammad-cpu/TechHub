@@ -1,16 +1,19 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { use } from 'react';
 import ProductCard from '@/components/ProductCard';
 import { getProducts } from '@/lib/supabase/queries';
+import toast, { Toaster } from 'react-hot-toast';
 import { Search } from 'lucide-react';
 
 export default function ProductsPage({ searchParams }) {
+  const resolvedSearchParams = use(searchParams);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const search = searchParams.search || '';
+  const search = resolvedSearchParams.search || '';
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -39,6 +42,9 @@ export default function ProductsPage({ searchParams }) {
 
     localStorage.setItem('cart', JSON.stringify(cart));
     window.dispatchEvent(new Event('storage'));
+    
+    // Show toast notification
+    toast.success(`${product.name} added to cart!`);
   };
 
   if (loading) {
@@ -51,6 +57,7 @@ export default function ProductsPage({ searchParams }) {
 
   return (
     <div className="container mx-auto px-4 py-20">
+      <Toaster position="top-right" />
       <h1 className="text-4xl font-bold text-gray-900 mb-8">All Products</h1>
 
       {/* Search Bar */}

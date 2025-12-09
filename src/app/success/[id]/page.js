@@ -1,10 +1,11 @@
 'use client';
 
+import { use } from 'react';
 import Link from 'next/link';
 import { CheckCircle, ArrowRight } from 'lucide-react';
 
 export default function SuccessPage({ params }) {
-  const orderId = params.id;
+  const { id: orderId } = use(params);
 
   return (
     <div className="container mx-auto px-4 py-20 min-h-screen flex items-center">

@@ -1,211 +1,309 @@
-# Project Setup Guide
+# TechHub - E-Commerce Platform Setup Guide
 
-## Prerequisites
+## Project Overview
+TechHub is a modern e-commerce platform built with Next.js, Tailwind CSS, and Supabase. It features:
+- Public product browsing (no authentication required)
+- Shopping cart functionality with local storage
+- Admin panel with PIN-based security
+- Full CRUD operations for products
+- Order management system
 
-- Node.js 18+
-- npm or yarn
-- Supabase account (free tier available)
+## Architecture
 
-## Installation
+### Tech Stack
+- **Frontend**: Next.js 14, React, Tailwind CSS
+- **Backend**: Supabase (PostgreSQL)
+- **Authentication**: PIN-based admin access
+- **Styling**: Tailwind CSS (no separate CSS files)
 
-### 1. Install Dependencies
-
-```bash
-npm install
+### Project Structure
+```
+src/
+├── app/                          # Next.js app directory
+│   ├── page.js                  # Home page
+│   ├── layout.js                # Root layout
+│   ├── globals.css              # Global Tailwind styles
+│   ├── products/                # Product listing page
+│   ├── cart/                    # Shopping cart
+│   ├── checkout/                # Checkout process
+│   ├── admin/                   # Admin panel
+│   │   ├── login/               # Admin PIN login (SECRET PATH)
+│   │   ├── dashboard/           # Main admin dashboard
+│   │   └── products/
+│   │       ├── add/             # Add new product
+│   │       └── [id]/            # Edit product
+│   ├── collections/             # Product collections
+│   ├── vendors/                 # Vendor listings
+│   ├── contact/                 # Contact page
+│   ├── about/                   # About page
+│   └── success/                 # Order success page
+├── components/                   # Reusable components
+│   ├── Header.js                # Navigation header
+│   ├── Footer.js                # Footer
+│   ├── ProductCard.js           # Product card component
+│   ├── LayoutWrapper.js         # Wrapper component
+│   └── LoadingSpinner.js        # Loading indicator
+└── lib/
+    └── supabase/
+        ├── client.js            # Client-side Supabase config
+        ├── server.js            # Server-side Supabase config
+        ├── queries.js           # All database queries
+        └── schema.sql           # Database schema
 ```
 
-### 2. Setup Supabase
+## Database Schema
 
-1. Create a new project at [supabase.com](https://supabase.com)
-2. Copy your project credentials (see `.env.example`)
-3. Create `.env.local` file with your Supabase credentials
-4. Run the database schema setup (see `.env.example`)
-
-### 3. Start Development Server
-
-```bash
-npm run dev
+### Products Table
+```sql
+CREATE TABLE products (
+  id UUID PRIMARY KEY,
+  name TEXT NOT NULL,
+  price NUMERIC NOT NULL,
+  image TEXT,
+  description TEXT,
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP
+);
 ```
 
-Visit `http://localhost:3000`
-
-## Project Structure
-
-```
-my-app/
-├── src/
-│   ├── app/                 # Next.js App Router pages
-│   │   ├── page.js         # Home page
-│   │   ├── products/       # Products listing
-│   │   ├── product/[id]/   # Product details
-│   │   ├── cart/           # Shopping cart
-│   │   ├── checkout/       # Checkout form
-│   │   ├── success/[id]/   # Order success
-│   │   └── admin/          # Admin pages (protected)
-│   ├── components/         # Reusable React components
-│   │   ├── Header.js
-│   │   ├── Footer.js
-│   │   ├── ProductCard.js
-│   │   ├── Toast.js
-│   │   └── LoadingSpinner.js
-│   └── lib/
-│       └── supabase/
-│           ├── client.js        # Supabase client (browser)
-│           ├── server.js        # Supabase admin client (server)
-│           ├── queries.js       # Server actions (CRUD)
-│           └── schema.sql       # Database schema
-├── middleware.js           # Route protection
-├── tailwind.config.ts     # Tailwind CSS config
-└── package.json
+### Orders Table
+```sql
+CREATE TABLE orders (
+  id UUID PRIMARY KEY,
+  full_name TEXT NOT NULL,
+  phone TEXT NOT NULL,
+  address TEXT NOT NULL,
+  email TEXT,
+  products JSONB NOT NULL,
+  total_price NUMERIC NOT NULL,
+  status TEXT DEFAULT 'pending',
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP
+);
 ```
 
-## Key Features
-
-### Customer Features
-- ✅ Browse products
-- ✅ View product details
-- ✅ Add to cart (localStorage)
-- ✅ Checkout without account
-- ✅ Place orders → saved to Supabase
-- ✅ Order success confirmation
-
-### Admin Features
-- ✅ Create products
-- ✅ Edit products
-- ✅ Delete products
-- ✅ List all products
-- ✅ PIN-based protection (no login required)
-
-## Admin Access
-
-Access the admin panel with your PIN:
-
-```
-http://localhost:3000/admin/products?key=YOUR_PIN
+### Admin Users Table
+```sql
+CREATE TABLE admin_users (
+  id UUID PRIMARY KEY,
+  pin TEXT NOT NULL UNIQUE,
+  name TEXT,
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP
+);
 ```
 
-Default PIN (from .env.local): `1234`
+## Admin Panel Access
 
-## Database Tables
-
-### products
-- id (UUID)
-- name (TEXT)
-- price (NUMERIC)
-- image (TEXT - URL)
-- description (TEXT)
-- created_at (TIMESTAMP)
-- updated_at (TIMESTAMP)
-
-### orders
-- id (UUID)
-- full_name (TEXT)
-- email (TEXT)
-- phone (TEXT)
-- address (TEXT)
-- products (JSONB - array of items)
-- total_price (NUMERIC)
-- status (TEXT - 'pending', 'processing', 'shipped', 'delivered')
-- created_at (TIMESTAMP)
-- updated_at (TIMESTAMP)
-
-### admin_users
-- id (UUID)
-- pin (TEXT - unique PIN code)
-- name (TEXT)
-- created_at (TIMESTAMP)
-- updated_at (TIMESTAMP)
-
-## Technologies Used
-
-- **Next.js 14** - React framework with App Router
-- **React 19** - UI library
-- **Tailwind CSS 4** - Styling
-- **Supabase** - Backend + Database
-- **Lucide React** - Icons
-- **Server Actions** - CRUD operations
-
-## Commands
-
-```bash
-# Development
-npm run dev
-
-# Build
-npm run build
-
-# Production
-npm run start
+### Login URL
+```
+http://localhost:3000/admin/login
 ```
 
-## API Routes vs Server Actions
+### Features
+1. **PIN-Based Authentication**: Enter 4-digit PIN to access admin panel
+2. **Product Management**: 
+   - View all products in dashboard
+   - Add new products
+   - Edit existing products
+   - Delete products
+3. **Dashboard**: `/admin/dashboard` - Main admin interface
+4. **Add Product**: `/admin/products/add` - Add new products
+5. **Edit Product**: `/admin/products/[id]` - Edit specific products
 
-This project uses **Server Actions** for CRUD operations:
+### Session Management
+- PIN stored in sessionStorage
+- Session expires after 24 hours
+- Auto-logout redirects to login page
 
+## Key URLs
+
+### Public Pages
+- **Home**: `/` - Homepage with featured products
+- **Products**: `/products` - All products list
+- **Collections**: `/collections/[slug]` - Category collections
+- **Vendors**: `/vendors` - Vendor listings
+- **Cart**: `/cart` - Shopping cart
+- **Checkout**: `/checkout` - Checkout process
+- **About**: `/about` - About page
+- **Contact**: `/contact` - Contact page
+
+### Admin Pages (PIN Protected)
+- **Admin Login**: `/admin/login` - Enter PIN
+- **Admin Dashboard**: `/admin/dashboard` - Main panel
+- **Add Product**: `/admin/products/add` - Create new product
+- **Edit Product**: `/admin/products/[id]` - Edit product
+- **Success Page**: `/success/[id]` - Order confirmation
+
+## Database Queries Available
+
+All queries are in `src/lib/supabase/queries.js`:
+
+### Products
 ```javascript
-// src/lib/supabase/queries.js
-export async function getProducts() { ... }
-export async function createProduct(formData) { ... }
-export async function updateProduct(id, formData) { ... }
-export async function deleteProduct(id) { ... }
-export async function createOrder(orderData) { ... }
+getProducts()                    // Get all products
+getProductById(id)              // Get single product
+createProduct(formData)         // Add new product
+updateProduct(id, formData)     // Update product
+deleteProduct(id)               // Delete product
 ```
 
-Usage in components:
+### Orders
 ```javascript
-'use client';
-import { getProducts } from '@/lib/supabase/queries';
-
-const result = await getProducts();
+createOrder(orderData)          // Create new order
+getOrders()                     // Get all orders
+getOrderById(id)                // Get single order
 ```
 
-## Security Notes
+### Admin Authentication
+```javascript
+verifyAdminPin(pin)             // Verify PIN
+createAdminPin(pin, name)       // Create new PIN
+```
 
-1. **Environment Variables**
-   - Never commit `.env.local`
-   - Add to `.gitignore`
-   - Keep SERVICE_ROLE_KEY secret
+## Adding Your First Admin PIN
 
-2. **Admin Protection**
-   - Uses URL parameter PIN validation
-   - Middleware checks all `/admin` routes
-   - PIN stored in environment variable
+In your Supabase dashboard:
 
-3. **Database Security**
-   - Row Level Security (RLS) enabled
-   - Public read for products
-   - Public insert for orders
-   - Protected admin_users table
+1. Go to **SQL Editor**
+2. Run this command:
+```sql
+INSERT INTO admin_users (pin, name) VALUES ('1234', 'Admin');
+```
+
+3. Visit `http://localhost:3000/admin/login`
+4. Enter PIN: **1234**
+
+## Removed Features
+- Hardcoded product data (now uses Supabase)
+- Separate CSS files (using Tailwind CSS only)
+- Collection and vendor filtering (simplified to display all products)
+
+## Component Guide
+
+### Header Component (`src/components/Header.js`)
+- Navigation with links to home, products, and cart
+- Cart count display
+- Responsive mobile menu
+- Uses Tailwind CSS for styling
+
+### Footer Component (`src/components/Footer.js`)
+- Footer with quick links
+- Contact information
+- Newsletter signup form
+- Copyright info
+
+### ProductCard Component (`src/components/ProductCard.js`)
+- Product image, name, price
+- Add to cart button
+- Responsive grid layout
+
+### LayoutWrapper Component (`src/components/LayoutWrapper.js`)
+- Wraps Header, main content, and Footer
+- Provides consistent layout structure
+
+## How to Add Products
+
+### Method 1: Via Admin Panel (Recommended)
+1. Navigate to `/admin/login`
+2. Enter your PIN
+3. Click "Add New Product" button
+4. Fill in product details:
+   - Product Name (required)
+   - Price (required)
+   - Description (optional)
+   - Image URL (optional)
+5. Click "Add Product"
+
+### Method 2: Via Supabase Console
+1. Go to your Supabase project
+2. Open **Table Editor**
+3. Click on `products` table
+4. Click **Insert row**
+5. Fill in the product details
+
+### Product Data Requirements
+```javascript
+{
+  name: "Product Name",           // Required
+  price: 99.99,                   // Required (number)
+  description: "Product details", // Optional
+  image: "https://...",           // Optional (full image URL)
+  created_at: "auto",             // Auto-generated
+  updated_at: "auto"              // Auto-generated
+}
+```
+
+## Environment Variables
+
+Create `.env.local` file with:
+```
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+```
+
+## Styling
+
+The project uses **Tailwind CSS** exclusively:
+- No separate CSS files needed
+- Use Tailwind utility classes in components
+- Global styles in `src/app/globals.css`
+- Responsive design built-in with Tailwind's breakpoints
+
+### Common Tailwind Classes Used
+- `container`, `mx-auto`, `px-4` - Layout
+- `bg-white`, `bg-gray-50` - Backgrounds
+- `text-xl`, `font-bold` - Typography
+- `flex`, `grid` - Layouts
+- `hover:`, `transition` - Interactions
+
+## Deployment
+
+### Prerequisites
+- Supabase account with populated database
+- Environment variables set
+- Node.js 18+ installed
+
+### Deploy to Vercel
+1. Push code to GitHub
+2. Connect repository to Vercel
+3. Add environment variables
+4. Deploy
 
 ## Troubleshooting
 
-### "Missing Supabase environment variables"
-- Check `.env.local` has correct values
-- Verify variables are set in Supabase dashboard
-- Restart dev server after changes
+### Admin Login Not Working
+- Verify PIN exists in `admin_users` table
+- Check sessionStorage in browser DevTools
+- Ensure PIN is at least 4 characters
 
-### Products not appearing
-- Ensure database schema is created (run SQL)
-- Check RLS policies allow public read
-- Verify data exists in Supabase dashboard
+### Products Not Loading
+- Check Supabase connection
+- Verify `products` table exists
+- Check Row Level Security (RLS) policies allow SELECT
 
-### Admin panel redirects to home
-- Check PIN in URL matches `.env.local`
-- Verify middleware.js is in root directory
-- Clear browser cache
+### Images Not Displaying
+- Verify image URL is valid and publicly accessible
+- Check image URL starts with `https://`
+- Use valid image format (jpg, png, gif, webp)
 
-### Database operations failing
-- Verify SERVICE_ROLE_KEY is correct
-- Check table names match schema
-- Ensure RLS policies are set correctly
+## Notes for Development
 
-## Additional Resources
+1. **Authentication**: Built-in authentication not required for customers (browse and checkout anonymously)
+2. **Database**: All product and order data is in Supabase
+3. **Security**: Admin panel uses session-based PIN authentication
+4. **Real Data**: Only Supabase data is displayed (no hardcoded data)
+5. **Styling**: Pure Tailwind CSS - no build-time CSS compilation issues
 
-- [Next.js Documentation](https://nextjs.org/docs)
-- [Supabase Documentation](https://supabase.com/docs)
-- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
-- [Lucide Icons](https://lucide.dev)
+## Next Steps
 
-## License
+1. Set up Supabase project and database
+2. Add admin PIN via SQL
+3. Access admin panel at `/admin/login`
+4. Add products via admin panel at `/admin/products/add`
+5. Visit home page to see products displayed
 
-MIT
+---
+
+For more details, refer to individual page files and component documentation.

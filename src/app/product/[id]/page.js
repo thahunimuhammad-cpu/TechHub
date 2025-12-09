@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { use } from 'react';
 import { getProductById } from '@/lib/supabase/queries';
 import { Plus, Minus, ShoppingCart } from 'lucide-react';
 import Link from 'next/link';
 
 export default function ProductDetail({ params }) {
+  const { id } = use(params);
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
@@ -13,14 +15,14 @@ export default function ProductDetail({ params }) {
 
   useEffect(() => {
     const loadProduct = async () => {
-      const result = await getProductById(params.id);
+      const result = await getProductById(id);
       if (result.success) {
         setProduct(result.data);
       }
       setLoading(false);
     };
     loadProduct();
-  }, [params.id]);
+  }, [id]);
 
   const handleAddToCart = () => {
     if (!product) return;

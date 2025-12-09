@@ -1,18 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { getProductById, updateProduct } from '@/lib/supabase/queries';
-import Link from 'next/link';
+import { use } from 'react';
+import { useRouter, useParams } from 'next/navigation';
+import { createProduct, updateProduct, getProductById } from '@/lib/supabase/queries';
 import { ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 
-export default function EditProductPage({ params, searchParams }) {
+export default function ProductFormPage({ params }) {
   const router = useRouter();
-  const adminKey = searchParams.key;
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState('');
+  const { id: productId } = use(params);
+  const isEditing = productId && productId !== 'add';
+
   const [formData, setFormData] = useState({
     name: '',
     price: '',
@@ -20,43 +19,87 @@ export default function EditProductPage({ params, searchParams }) {
     image: '',
   });
 
+  const [loading, setLoading] = useState(isEditing);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+
   useEffect(() => {
-    const loadProduct = async () => {
-      const result = await getProductById(params.id);
+    // Check admin authentication
+    const adminPin = sessionStorage.getItem('adminPin');
+    if (!adminPin) {
+      router.push('/admin/login');
+      return;
+    }
+
+    // Load product if editing
+    if (isEditing && productId !== 'add') {
+      loadProduct();
+    } else {
+      setLoading(false);
+    }
+  }, []);
+
+  const loadProduct = async () => {
+    try {
+      const result = await getProductById(productId);
       if (result.success) {
-        setProduct(result.data);
         setFormData({
           name: result.data.name,
-          price: result.data.price,
+          price: result.data.price.toString(),
           description: result.data.description || '',
           image: result.data.image || '',
         });
+      } else {
+        setError('Product not found');
       }
+    } catch (err) {
+      setError('Failed to load product');
+    } finally {
       setLoading(false);
-    };
-    loadProduct();
-  }, [params.id]);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData(prev => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitting(true);
     setError('');
+    setSubmitting(true);
 
     try {
-      const result = await updateProduct(params.id, formData);
-      if (result.success) {
-        router.push(`/admin/products?key=${adminKey}`);
+      // Validation
+      if (!formData.name.trim()) {
+        setError('Product name is required');
+        setSubmitting(false);
+        return;
+      }
+
+      if (!formData.price || parseFloat(formData.price) <= 0) {
+        setError('Valid price is required');
+        setSubmitting(false);
+        return;
+      }
+
+      let result;
+      if (isEditing && productId !== 'add') {
+        result = await updateProduct(productId, formData);
       } else {
-        setError(result.error || 'Failed to update product');
+        result = await createProduct(formData);
+      }
+
+      if (result.success) {
+        router.push('/admin/dashboard');
+      } else {
+        setError(result.error || 'Failed to save product');
       }
     } catch (err) {
-      setError('An error occurred. Please try again.');
-      console.error(err);
+      setError('An error occurred while saving the product');
     } finally {
       setSubmitting(false);
     }
@@ -64,127 +107,140 @@ export default function EditProductPage({ params, searchParams }) {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-20">
-        <div className="text-center">Loading product...</div>
-      </div>
-    );
-  }
-
-  if (!product) {
-    return (
-      <div className="container mx-auto px-4 py-20">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">Product not found</h1>
-        <Link href={`/admin/products?key=${adminKey}`} className="text-blue-600">
-          Back to Products
-        </Link>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading product...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-20">
-      <Link
-        href={`/admin/products?key=${adminKey}`}
-        className="text-blue-600 hover:text-blue-800 mb-8 flex items-center gap-2"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Back to Products
-      </Link>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow">
+        <div className="container mx-auto px-4 py-4">
+          <Link href="/admin/dashboard" className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-4">
+            <ArrowLeft className="w-4 h-4" />
+            Back to Dashboard
+          </Link>
+          <h1 className="text-2xl font-bold text-gray-800">
+            {isEditing && productId !== 'add' ? 'Edit Product' : 'Add New Product'}
+          </h1>
+        </div>
+      </header>
 
-      <div className="max-w-2xl">
-        <h1 className="text-4xl font-bold text-gray-900 mb-8">Edit Product</h1>
+      {/* Main Content */}
+      <main className="container mx-auto px-4 py-8">
+        <div className="max-w-2xl mx-auto">
+          <div className="bg-white rounded-lg shadow p-8">
+            {error && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600">
+                {error}
+              </div>
+            )}
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-8">
-          {error && (
-            <div className="bg-red-100 border border-red-400 text-red-800 px-4 py-3 rounded mb-6">
-              {error}
-            </div>
-          )}
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Product Name */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Product Name *
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="Enter product name"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  disabled={submitting}
+                />
+              </div>
 
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Product Name *
-              </label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                className="input-field w-full"
-                required
-              />
-            </div>
+              {/* Price */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Price ($) *
+                </label>
+                <input
+                  type="number"
+                  name="price"
+                  value={formData.price}
+                  onChange={handleChange}
+                  placeholder="0.00"
+                  step="0.01"
+                  min="0"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  disabled={submitting}
+                />
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Price *
-              </label>
-              <input
-                type="number"
-                name="price"
-                step="0.01"
-                value={formData.price}
-                onChange={handleChange}
-                className="input-field w-full"
-                required
-              />
-            </div>
+              {/* Description */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Description
+                </label>
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  placeholder="Enter product description"
+                  rows="4"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition resize-none disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  disabled={submitting}
+                />
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Description
-              </label>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                rows="4"
-                className="input-field w-full"
-              />
-            </div>
+              {/* Image URL */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Image URL
+                </label>
+                <input
+                  type="url"
+                  name="image"
+                  value={formData.image}
+                  onChange={handleChange}
+                  placeholder="https://example.com/image.jpg"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  disabled={submitting}
+                />
+                {formData.image && (
+                  <div className="mt-4">
+                    <p className="text-sm text-gray-600 mb-2">Preview:</p>
+                    <img
+                      src={formData.image}
+                      alt="Product preview"
+                      className="w-32 h-32 object-cover rounded-lg"
+                      onError={() => {
+                        // If image fails to load, show placeholder
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Image URL
-              </label>
-              <input
-                type="url"
-                name="image"
-                value={formData.image}
-                onChange={handleChange}
-                className="input-field w-full"
-                placeholder="https://example.com/image.jpg"
-              />
-              {formData.image && (
-                <div className="mt-4">
-                  <img
-                    src={formData.image}
-                    alt="Preview"
-                    className="max-h-48 rounded"
-                  />
-                </div>
-              )}
-            </div>
+              {/* Submit Button */}
+              <div className="flex gap-4">
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="flex-1 bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {submitting ? 'Saving...' : isEditing && productId !== 'add' ? 'Update Product' : 'Add Product'}
+                </button>
+                <Link
+                  href="/admin/dashboard"
+                  className="flex-1 bg-gray-300 text-gray-800 py-2 rounded-lg font-medium hover:bg-gray-400 transition text-center"
+                >
+                  Cancel
+                </Link>
+              </div>
+            </form>
           </div>
-
-          <div className="flex gap-4 mt-8">
-            <button
-              type="submit"
-              disabled={submitting}
-              className="btn btn-primary flex-1 py-3 disabled:opacity-50"
-            >
-              {submitting ? 'Updating...' : 'Update Product'}
-            </button>
-            <Link
-              href={`/admin/products?key=${adminKey}`}
-              className="btn btn-secondary flex-1 py-3 text-center"
-            >
-              Cancel
-            </Link>
-          </div>
-        </form>
-      </div>
+        </div>
+      </main>
     </div>
   );
 }
